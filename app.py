@@ -109,7 +109,7 @@ def register():
         password = request.form["password"]
 
         # Automatically assign adviser role to the first 3 accounts
-        adviser_accounts = ["your_username", "friend_username", "teacher_username"]  # REPLACE with your actual usernames
+        adviser_accounts = ["Hank", "Zen Ablao", "Rey Batiles"]  # REPLACE with your actual usernames
         role = "adviser" if username in adviser_accounts else "student"
 
         conn = sqlite3.connect(DB_NAME)
@@ -245,4 +245,5 @@ def total_attendance():
 
 # ------------------ RUN APP ------------------
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=10000, debug=True)
