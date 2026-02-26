@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; }
+        button { padding: 20px; margin: 15px; font-size: 18px; width: 80%; max-width: 300px; }
+    </style>
+</head>
+<body>
+    <h2>Welcome, {{ username }}!</h2>
+    <p>Role: {{ role }}</p>
+
+    {% if role in ["adviser", "secretary"] %}
+        <form action="/add_student"><button>Add Student</button></form>
+    {% endif %}
+    {% if role == "adviser" %}
+        <form action="/remove_student"><button>Remove Student</button></form>
+    {% endif %}
+    
+    <form action="/attendance"><button>Mark Attendance</button></form>
+
+    {% if role in ["adviser", "secretary"] %}
+        <form action="/total_attendance"><button>Total Attendance</button></form>
+    {% endif %}
+
+    <form action="/logout"><button>Logout</button></form>
+</body>
+</html>
