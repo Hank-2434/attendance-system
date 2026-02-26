@@ -1,8 +1,0 @@
-<h1>Mark Attendance</h1>
-{% for student in students %}
-    <form action="/mark_attendance/{{ student[1] }}" method="get" style="display:inline;">
-        <button type="submit">{{ student[2] }} ({{ student[3] }})</button>
-    </form>
-{% endfor %}
-<br><br>
-<a href="/">Back</a>
