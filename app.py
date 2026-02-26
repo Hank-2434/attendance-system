@@ -17,26 +17,6 @@ SCHEDULE = {
 }
 
 # -------------------- LOGIN / REGISTER --------------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute("SELECT role FROM users WHERE username=? AND password=?", (username, password))
-        result = cursor.fetchone()
-        conn.close()
-
-        if result:
-            session["username"] = username
-            session["role"] = result[0]
-            return redirect("/")
-        else:
-            return render_template("login.html", error="Invalid credentials")
-    return render_template("login.html")
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -56,6 +36,26 @@ def register():
         return redirect("/login")
     
     return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT role FROM users WHERE username=? AND password=?", (username, password))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            session["username"] = username
+            session["role"] = result[0]
+            return redirect("/")
+        else:
+            return render_template("login.html", error="Invalid credentials")
+    return render_template("login.html")
 
 @app.route("/logout")
 def logout():
