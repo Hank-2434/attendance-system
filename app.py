@@ -17,6 +17,19 @@ SCHEDULE = {
 }
 
 # -------------------- LOGIN / REGISTER --------------------
+# -------------------- LANDING PAGE --------------------
+@app.route("/")
+def landing():
+    if "username" in session:
+        return redirect("/home")  # already logged in
+    return render_template("landing.html")
+
+# -------------------- HOME PAGE --------------------
+@app.route("/home")
+@login_required()
+def index():
+    return render_template("index.html", username=session.get("username"), role=session.get("role"))
+    
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
