@@ -7,7 +7,7 @@ app.secret_key = "your_secret_key"  # required for sessions
 
 DB_NAME = "attendance.db"
 
-# Simple schedule example
+# -------------------- CLASS SCHEDULE --------------------
 SCHEDULE = {
     "Monday": {"start": "08:00", "grace": 10},
     "Tuesday": {"start": "07:00", "grace": 10},
@@ -16,7 +16,7 @@ SCHEDULE = {
     "Friday": {"start": "08:00", "grace": 10},
 }
 
-# -------------------- LOGIN SYSTEM --------------------
+# -------------------- LOGIN / REGISTER --------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -37,12 +37,32 @@ def login():
             return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                           (username, password, "student"))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            return render_template("register.html", error="Username already exists")
+        conn.close()
+        return redirect("/login")
+    
+    return render_template("register.html")
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
-# -------------------- ROUTE GUARD --------------------
+# -------------------- ROLE-BASED ACCESS --------------------
 def login_required(roles=None):
     def wrapper(fn):
         def decorated(*args, **kwargs):
@@ -55,7 +75,7 @@ def login_required(roles=None):
         return decorated
     return wrapper
 
-# -------------------- HOME PAGE --------------------
+# -------------------- HOME --------------------
 @app.route("/")
 @login_required()
 def index():
@@ -96,7 +116,6 @@ def remove_student():
         cursor.execute("DELETE FROM attendance WHERE student_id=?", (student_id,))
         conn.commit()
         return redirect("/remove_student")
-    # Show all students
     cursor.execute("SELECT student_id, name FROM students")
     students = cursor.fetchall()
     conn.close()
@@ -122,17 +141,13 @@ def attendance():
                 start_time = datetime.strptime(SCHEDULE[day_of_week]["start"], "%H:%M")
                 late_cutoff = start_time + timedelta(minutes=SCHEDULE[day_of_week]["grace"])
             else:
-                late_cutoff = datetime.now()  # default
+                late_cutoff = datetime.now()
 
             status = "On Time" if datetime.now().time() <= late_cutoff.time() else "Late"
             date = today.strftime("%Y-%m-%d")
             time_in = today.strftime("%H:%M")
 
-            # Prevent duplicates
-            cursor.execute(
-                "SELECT * FROM attendance WHERE student_id=? AND date=?",
-                (student_id, date)
-            )
+            cursor.execute("SELECT * FROM attendance WHERE student_id=? AND date=?", (student_id, date))
             if not cursor.fetchone():
                 cursor.execute(
                     "INSERT INTO attendance (student_id, name, date, time_in, status) VALUES (?, ?, ?, ?, ?)",
@@ -142,14 +157,13 @@ def attendance():
         conn.close()
     return render_template("attendance.html")
 
-# -------------------- VIEW TOTAL ATTENDANCE --------------------
+# -------------------- TOTAL ATTENDANCE --------------------
 @app.route("/total_attendance")
 @login_required(roles=["adviser", "secretary"])
 def total_attendance():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Male attendance totals
     cursor.execute("""
         SELECT status, COUNT(*)
         FROM attendance a
@@ -159,7 +173,6 @@ def total_attendance():
     """)
     male_data = cursor.fetchall()
 
-    # Female attendance totals
     cursor.execute("""
         SELECT status, COUNT(*)
         FROM attendance a
@@ -170,11 +183,7 @@ def total_attendance():
     female_data = cursor.fetchall()
 
     conn.close()
-    return render_template(
-        "total_attendance.html",
-        male_data=male_data,
-        female_data=female_data
-    )
+    return render_template("total_attendance.html", male_data=male_data, female_data=female_data)
 
 # -------------------- RUN APP --------------------
 if __name__ == "__main__":
