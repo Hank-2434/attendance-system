@@ -1,0 +1,14 @@
+<h1>{{ gender }} Attendance</h1>
+<table border="1">
+<tr><th>ID</th><th>Name</th><th>Date</th><th>Time</th><th>Status</th></tr>
+{% for r in records %}
+<tr>
+<td>{{ r[0] }}</td>
+<td>{{ r[1] }}</td>
+<td>{{ r[2] }}</td>
+<td>{{ r[3] }}</td>
+<td>{{ r[4] }}</td>
+</tr>
+{% endfor %}
+</table>
+<a href="/">Back</a>
