@@ -11,7 +11,7 @@ conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
 
 # Replace these with the actual usernames
-advisers = ["your_username", "friend_username", "teacher_username"]
+advisers = ["Hank", "friend_username", "Rey Batiles"]
 
 cursor.execute(
     "UPDATE users SET role='adviser' WHERE username IN ({})".format(
@@ -22,4 +22,5 @@ cursor.execute(
 
 conn.commit()
 conn.close()
+
 print("Roles updated successfully!")
